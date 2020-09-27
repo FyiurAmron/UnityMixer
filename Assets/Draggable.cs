@@ -3,14 +3,13 @@ using UnityEngine;
 
 public class Draggable : MonoBehaviour {
     private Vector3 offset;
-    private Vector3 originalPos;
+    public Vector3 originalPos; // hmm
     private float mousePosZ;
 
     private bool lastTarget = false;
 
     private Camera mainCamera;
     private Rigidbody myRigidbody;
-    private AudioSource myAudioSource;
 
     public bool isXEnabled = true;
     public bool isYEnabled = true;
@@ -18,13 +17,21 @@ public class Draggable : MonoBehaviour {
 
     public bool isKinematic = true;
 
+    // [Range( 0, 9 )]
+    // public int mouseButtonNr = 0;
+
     [Range( 0, float.MaxValue )]
     public float distanceLimit = float.MaxValue;
+
+    public IDragListener dragListener;
 
     public static T clamp<T>( T value, T min, T max ) where T : IComparable<T> {
         return ( value.CompareTo( min ) < 0 ) ? min
             : ( value.CompareTo( max ) > 0 ) ? max
             : value;
+    }
+
+    public Draggable() {
     }
 
     private Vector3 getMouseAsWorldPoint() {
@@ -39,10 +46,11 @@ public class Draggable : MonoBehaviour {
             myRigidbody.detectCollisions = false;
             // myRigidbody.useGravity = false;
         }
-
+        
         originalPos = transform.position;
         mousePosZ = mainCamera.WorldToScreenPoint( originalPos ).z;
         offset = originalPos - getMouseAsWorldPoint();
+        dragListener?.onDragStart( this );
     }
 
     private void onDrag() {
@@ -56,11 +64,7 @@ public class Draggable : MonoBehaviour {
             }
         }
 
-        myAudioSource.volume = dst.x;
-        myAudioSource.pitch = dst.y;
-        myAudioSource.panStereo = dst.z;
-
-        transform.position = dst;
+        dragListener?.onDrag( this, dst );
     }
 
     private void onDragStop() {
@@ -70,13 +74,13 @@ public class Draggable : MonoBehaviour {
             // myRigidbody.useGravity = true;
         }
 
-        // other stuff
+        dragListener?.onDragStop( this );
     }
 
     private void handleDrag( bool isTriggerActive ) {
         bool isTargeted = isTriggerActive
             && Physics.Raycast( mainCamera.ScreenPointToRay( Input.mousePosition ), out RaycastHit hit )
-            && hit.transform.name != transform.name;
+            && hit.rigidbody == myRigidbody;
 
         if ( !lastTarget ) {
             if ( !isTargeted ) {
@@ -84,7 +88,7 @@ public class Draggable : MonoBehaviour {
             }
 
             lastTarget = true;
-            // Debug.Log( "onDragStart" );
+            // Debug.Log( $"onDragStart {name}" );
             onDragStart();
 
             return;
@@ -92,19 +96,21 @@ public class Draggable : MonoBehaviour {
 
         if ( !isTargeted ) {
             lastTarget = false;
-            // Debug.Log( "onDragStop" );
+            // Debug.Log( $"onDragStop {name}" );
             onDragStop();
             return;
         }
 
-        // Debug.Log( "onDrag" );
+        // Debug.Log( $"onDrag {name}" );
         onDrag();
     }
 
     private void Start() {
-        myRigidbody = GetComponent<Rigidbody>();
-        myAudioSource = GetComponent<AudioSource>();
         // Debug.Log( String.Join<Component>( ",", GetComponents<Component>() ) );
+        myRigidbody = GetComponent<Rigidbody>();
+
+        // originalScale: assume 1,1,1 now, TODO
+        // originalRot: assume 0,0,0, TODO
     }
 
     void Update() {
@@ -113,6 +119,14 @@ public class Draggable : MonoBehaviour {
             return;
         }
 
-        handleDrag( Input.GetMouseButton( 2 ) );
+        // handleDrag( Input.GetMouseButton( mouseButtonNr ) );
+        handleDrag( Input.GetMouseButton( 0 ) || Input.GetMouseButton( 1 ) );
     }
 }
+
+public interface IDragListener {
+    public void onDragStart( Draggable draggable );
+    public void onDrag( Draggable draggable, Vector3 dst );
+    public void onDragStop( Draggable draggable );
+}
+

@@ -7,7 +7,7 @@ public class CrosshairManager : MonoBehaviour
     public Sprite nullCrosshairSprite;
     public float crosshairUpdateshrpness = 5f;
 
-    PlayerWeaponsManager m_WeaponsManager;
+    // PlayerWeaponsManager m_WeaponsManager;
     bool m_WasPointingAtEnemy;
     RectTransform m_CrosshairRectTransform;
     CrosshairData m_CrosshairDataDefault;
@@ -16,18 +16,18 @@ public class CrosshairManager : MonoBehaviour
 
     void Start()
     {
-        m_WeaponsManager = GameObject.FindObjectOfType<PlayerWeaponsManager>();
-        DebugUtility.HandleErrorIfNullFindObject<PlayerWeaponsManager, CrosshairManager>(m_WeaponsManager, this);
+        // m_WeaponsManager = GameObject.FindObjectOfType<PlayerWeaponsManager>();
+        // DebugUtility.HandleErrorIfNullFindObject<PlayerWeaponsManager, CrosshairManager>(m_WeaponsManager, this);
 
-        OnWeaponChanged(m_WeaponsManager.GetActiveWeapon());
+        // OnWeaponChanged(m_WeaponsManager.GetActiveWeapon());
 
-        m_WeaponsManager.onSwitchedToWeapon += OnWeaponChanged;
+        // m_WeaponsManager.onSwitchedToWeapon += OnWeaponChanged;
     }
 
     void Update()
     {
         UpdateCrosshairPointingAtEnemy(false);
-        m_WasPointingAtEnemy = m_WeaponsManager.isPointingAtEnemy;
+        // m_WasPointingAtEnemy = m_WeaponsManager.isPointingAtEnemy;
     }
 
     void UpdateCrosshairPointingAtEnemy(bool force)
@@ -35,18 +35,18 @@ public class CrosshairManager : MonoBehaviour
         if (m_CrosshairDataDefault.crosshairSprite == null)
             return;
 
-        if ((force || !m_WasPointingAtEnemy) && m_WeaponsManager.isPointingAtEnemy)
-        {
-            m_CurrentCrosshair = m_CrosshairDataTarget;
-            crosshairImage.sprite = m_CurrentCrosshair.crosshairSprite;
-            m_CrosshairRectTransform.sizeDelta = m_CurrentCrosshair.crosshairSize * Vector2.one;
-        }
-        else if ((force || m_WasPointingAtEnemy) && !m_WeaponsManager.isPointingAtEnemy)
-        {
-            m_CurrentCrosshair = m_CrosshairDataDefault;
-            crosshairImage.sprite = m_CurrentCrosshair.crosshairSprite;
-            m_CrosshairRectTransform.sizeDelta = m_CurrentCrosshair.crosshairSize * Vector2.one;
-        }
+        // if ((force || !m_WasPointingAtEnemy) && m_WeaponsManager.isPointingAtEnemy)
+        // {
+            // m_CurrentCrosshair = m_CrosshairDataTarget;
+            // crosshairImage.sprite = m_CurrentCrosshair.crosshairSprite;
+            // m_CrosshairRectTransform.sizeDelta = m_CurrentCrosshair.crosshairSize * Vector2.one;
+        // }
+        // else if ((force || m_WasPointingAtEnemy) && !m_WeaponsManager.isPointingAtEnemy)
+        // {
+            // m_CurrentCrosshair = m_CrosshairDataDefault;
+            // crosshairImage.sprite = m_CurrentCrosshair.crosshairSprite;
+            // m_CrosshairRectTransform.sizeDelta = m_CurrentCrosshair.crosshairSize * Vector2.one;
+        // }
 
         crosshairImage.color = Color.Lerp(crosshairImage.color, m_CurrentCrosshair.crosshairColor, Time.deltaTime * crosshairUpdateshrpness);
 
